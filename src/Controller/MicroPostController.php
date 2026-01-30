@@ -8,7 +8,6 @@ use App\Repository\MicroPostRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -49,7 +48,7 @@ final class MicroPostController extends AbstractController
 
         return $this->render('micro_post/add.html.twig', [
             'form' => $form->createView(),
-        ]);
+        ], new Response(null, $form->isSubmitted() && !$form->isValid() ? 422 : 200));
     }
 
     #[Route('/micro-post/{post}/edit', name: 'app_micro_post_edit')]
@@ -67,9 +66,9 @@ final class MicroPostController extends AbstractController
             return $this->redirectToRoute('app_micro_post',);
         }
 
-        return $this->render('micro_post/add.html.twig', [
+        return $this->render('micro_post/edit.html.twig', [
             'form' => $form->createView(),
-        ]);
+        ], new Response(null, $form->isSubmitted() && !$form->isValid() ? 422 : 200));
     }
 
 
