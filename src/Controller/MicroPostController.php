@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Comment;
 use App\Entity\MicroPost;
+use App\Form\CommentType;
 use App\Form\MicroPostType;
 use App\Repository\MicroPostRepository;
 use DateTime;
@@ -18,7 +20,7 @@ final class MicroPostController extends AbstractController
     public function index(MicroPostRepository $posts): Response
     {
         return $this->render('micro_post/index.html.twig', [
-            'posts' => $posts->findAll(),
+            'posts' => $posts->findAllWithComments(),
         ]);
     }
 
@@ -68,6 +70,28 @@ final class MicroPostController extends AbstractController
 
         return $this->render('micro_post/edit.html.twig', [
             'form' => $form->createView(),
+        ], new Response(null, $form->isSubmitted() && !$form->isValid() ? 422 : 200));
+    }
+    #[Route('/micro-post/{post}/comment', name: 'app_micro_post_comment')]
+    public function addComment(Request $request, EntityManagerInterface $entityManager, MicroPost $post): Response
+    {
+        $form = $this->createForm(CommentType::class, new Comment());
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $comment = $form->getData();
+            $comment->setPost($post);
+
+            $entityManager->persist($comment);
+            $entityManager->flush();
+            $this->addFlash('success', 'Comment created successfully!');
+
+            return $this->redirectToRoute('app_micro_post_show', ['post' => $post->getId()]);
+        }
+
+        return $this->render('micro_post/comment.html.twig', [
+            'form' => $form,
+            'post' => $post,
         ], new Response(null, $form->isSubmitted() && !$form->isValid() ? 422 : 200));
     }
 
