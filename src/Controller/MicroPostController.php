@@ -69,7 +69,8 @@ final class MicroPostController extends AbstractController
         }
 
         return $this->render('micro_post/edit.html.twig', [
-            'form' => $form->createView(),
+            'form' => $form,
+            'post' => $post,
         ], new Response(null, $form->isSubmitted() && !$form->isValid() ? 422 : 200));
     }
     #[Route('/micro-post/{post}/comment', name: 'app_micro_post_comment')]
